@@ -1,4 +1,12 @@
 import React from "react";
+var jsonData = {
+  "users": [
+      {
+          "name": "alan", 
+          "password": "123",
+      }
+  ]
+}
 
 class NameForm extends React.Component {
     constructor(props) {
@@ -15,6 +23,14 @@ class NameForm extends React.Component {
   
     handleSubmit(event) {
       alert('A name was submitted: ' + this.state.value);
+      console.log("json: " + jsonData);
+      console.log("json string" + JSON.stringify(jsonData));
+      fetch("http://localhost:3001/createuser", {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json',},
+        body: JSON.stringify(jsonData)
+      });
       event.preventDefault();
     }
   
