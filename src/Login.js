@@ -1,4 +1,6 @@
 import React from "react";
+
+//change data name and move into the class to wait for user info
 var jsonData = {
   "users": [
       {
@@ -11,18 +13,26 @@ var jsonData = {
 class NameForm extends React.Component {
     constructor(props) {
       super(props);
-      this.state = {value: ''};
+      this.state = {
+        valueUsername: '',
+        valuePassword: ''
+    };
   
       this.handleChange = this.handleChange.bind(this);
       this.handleSubmit = this.handleSubmit.bind(this);
     }
   
     handleChange(event) {
-      this.setState({value: event.target.value});
+      if(event.target.type === "text") {
+        this.setState({valueUsername: event.target.value});
+      }
+      if(event.target.type === "password") {
+        this.setState({valuePassword: event.target.value});
+      }
     }
   
     handleSubmit(event) {
-      alert('A name was submitted: ' + this.state.value);
+      alert('A name was submitted: ' + this.state.valueUsername + ' pass: ' + this.state.valuePassword);
       console.log("json: " + jsonData);
       console.log("json string" + JSON.stringify(jsonData));
       fetch("http://localhost:3001/createuser", {
@@ -39,12 +49,15 @@ class NameForm extends React.Component {
         <div>
           <form onSubmit={this.handleSubmit}>
             <label>
-              Name:
+              Username:
               <input type="text" value={this.state.value} onChange={this.handleChange} />
+              Password:
+              <input type="password" value={this.state.value} onChange={this.handleChange} />
             </label>
             <input type="submit" value="Submit" />
           </form>
-          <p>{this.state.value}</p>
+          <p>{this.state.valueUsername}</p>
+          <p>{this.state.valuePassword}</p>
         </div>
       );
     }
