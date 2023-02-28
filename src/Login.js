@@ -54,6 +54,7 @@ class NameForm extends React.Component {
       error => console.log(error)
       )
       .then((response) => {
+        console.log(response)
         if (response.dbRes === 1) {
           this.setState({isLoggedIn: true});
           //I'll need to check for a password and send back something else for incorrect pswd
@@ -61,6 +62,11 @@ class NameForm extends React.Component {
             document.cookie = `userIsLoggedIn=${this.state.valueUsername};`
             this.setState({isLoggedIn: true});
           }
+        }
+        if (response.dbRes === 'created') {
+          this.setState({cookieNameData: this.state.valueUsername});
+          this.setState({isLoggedIn: true});
+          document.cookie = `userIsLoggedIn=${this.state.valueUsername};`
         }
       })
       event.preventDefault()
