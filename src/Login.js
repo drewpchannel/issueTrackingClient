@@ -1,5 +1,5 @@
 import React from "react";
-
+//might want to just use hooks for the above
 //change data name and move into the class to wait for user info
 
 class NameForm extends React.Component {
@@ -8,11 +8,17 @@ class NameForm extends React.Component {
       this.state = {
         valueUsername: '',
         valuePassword: '',
-        jsonData: ''
+        jsonData: '',
+        isLoggedIn: false,
+        cookieNameData: '',
     };
   
       this.handleChange = this.handleChange.bind(this);
       this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    componentDidMount(){
+      this.checkForCookie();
     }
 
     createJsonUser(){
@@ -37,35 +43,64 @@ class NameForm extends React.Component {
     }
   
     handleSubmit(event) {
-      alert('A name was submitted: ' + this.state.valueUsername + ' pass: ' + this.state.valuePassword);
-      console.log("json: " + this.createJsonUser());
-      console.log("json string" + JSON.stringify(this.createJsonUser()));
+      //alert('A name was submitted: ' + this.state.valueUsername + ' pass: ' + this.state.valuePassword);
       fetch("http://localhost:3001/createuser", {
         method: 'POST',
         mode: 'cors',
         headers: { 'Content-Type': 'application/json',},
         body: JSON.stringify(this.createJsonUser())
-      });
-      event.preventDefault();
+      })
+      .then(response => response.json(),
+      error => console.log(error)
+      )
+      .then((response) => {
+        if (response.dbRes === 1) {
+          this.setState({isLoggedIn: true});
+          //I'll need to check for a password and send back something else for incorrect pswd
+          if(document.cookie.length === 0) {
+            document.cookie = `userIsLoggedIn=${this.state.valueUsername};`
+            this.setState({isLoggedIn: true});
+          }
+        }
+      })
+      event.preventDefault()
     }
-  
+
+    //I NEED THIS TO CHECK FOR COOKIES AND UPDATE
+    checkForCookie() {
+      let cookie = document.cookie;
+      if(!document.cookie || document.cookie === '') {
+        this.setState({cookieNameData: cookie.split('=')[1]});
+      } else {
+        this.setState({isLoggedIn: true});
+        this.setState({cookieNameData: cookie.split('=')[1]});
+      }
+    }
+
     render() {
+      let loginStatus;
+      if (this.state.cookieNameData) {
+        loginStatus = 
+        <p>Welcome {this.state.cookieNameData}</p>;
+      } else {
+        loginStatus =
+        <form onSubmit={this.handleSubmit}>
+          <label>
+            Username:
+            <input type="text" value={this.state.value} onChange={this.handleChange} />
+            Password:
+            <input type="password" value={this.state.value} onChange={this.handleChange} />
+          </label>
+          <input type="submit" value="Submit" />
+        </form>;
+      }
+
       return (
         <div>
-          <form onSubmit={this.handleSubmit}>
-            <label>
-              Username:
-              <input type="text" value={this.state.value} onChange={this.handleChange} />
-              Password:
-              <input type="password" value={this.state.value} onChange={this.handleChange} />
-            </label>
-            <input type="submit" value="Submit" />
-          </form>
-          <p>{this.state.valueUsername}</p>
-          <p>{this.state.valuePassword}</p>
+          {loginStatus}
         </div>
       );
     }
   }
 
-  export default NameForm;
+export default NameForm;
