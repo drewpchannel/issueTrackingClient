@@ -1,6 +1,7 @@
 import React from "react";
 //might want to just use hooks for the above
 //change data name and move into the class to wait for user info
+const serverIp = '10.16.34.246';
 
 class NameForm extends React.Component {
     constructor(props) {
@@ -11,6 +12,7 @@ class NameForm extends React.Component {
         jsonData: '',
         isLoggedIn: false,
         cookieNameData: '',
+        invalidPswd: false,
     };
   
       this.handleChange = this.handleChange.bind(this);
@@ -44,7 +46,7 @@ class NameForm extends React.Component {
   
     handleSubmit(event) {
       //alert('A name was submitted: ' + this.state.valueUsername + ' pass: ' + this.state.valuePassword);
-      fetch("http://localhost:3001/createuser", {
+      fetch(`http://${serverIp}:3001/createuser`, {
         method: 'POST',
         mode: 'cors',
         headers: { 'Content-Type': 'application/json',},
@@ -56,17 +58,27 @@ class NameForm extends React.Component {
       .then((response) => {
         console.log(response)
         if (response.dbRes === 1) {
-          this.setState({isLoggedIn: true});
           //I'll need to check for a password and send back something else for incorrect pswd
           if(document.cookie.length === 0) {
             document.cookie = `userIsLoggedIn=${this.state.valueUsername};`
+            this.setState({cookieNameData: document.cookie.split('=')[1]});
+            this.setState({isLoggedIn: true});
+          } else {
+            this.setState({cookieNameData: document.cookie.split('=')[1]});
             this.setState({isLoggedIn: true});
           }
         }
+
         if (response.dbRes === 'created') {
           this.setState({cookieNameData: this.state.valueUsername});
           this.setState({isLoggedIn: true});
           document.cookie = `userIsLoggedIn=${this.state.valueUsername};`
+        }
+
+        if (response.dbRes === 'invalid password') {
+          this.setState({invalidPswd: true});
+        } else {
+          this.setState({invalidPswd: false});
         }
       })
       event.preventDefault()
@@ -85,6 +97,8 @@ class NameForm extends React.Component {
 
     render() {
       let loginStatus;
+      let isPassInvalid;
+
       if (this.state.cookieNameData) {
         loginStatus = 
         <p>Welcome {this.state.cookieNameData}</p>;
@@ -101,9 +115,14 @@ class NameForm extends React.Component {
         </form>;
       }
 
+      if(this.state.invalidPswd) {
+        isPassInvalid = <p>Password Invalid</p>;
+      }
+
       return (
         <div>
           {loginStatus}
+          {isPassInvalid}
         </div>
       );
     }

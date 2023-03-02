@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# code to save or check out
+./src/test.js
