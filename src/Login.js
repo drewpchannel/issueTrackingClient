@@ -1,7 +1,7 @@
 import React from "react";
 //might want to just use hooks for the above
 //change data name and move into the class to wait for user info
-const serverIp = '10.16.34.246';
+const serverIp = '10.16.35.54';
 
 class NameForm extends React.Component {
     constructor(props) {

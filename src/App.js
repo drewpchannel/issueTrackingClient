@@ -3,7 +3,7 @@ import logo from "./logo.svg";
 import "./App.css";
 import FileZone from './draganddrop.js';
 
-const serverIp = '10.16.34.246';
+const serverIp = '10.16.35.54';
 
 function App() {
   const [data, setData] = useState(null);
