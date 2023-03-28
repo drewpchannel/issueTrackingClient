@@ -16,23 +16,25 @@ class FileZone extends React.Component {
   }
 
   getSavedTickets(username) {
-    console.log('trying to fetch');
-    fetch(`http://${serverIp}:3001/ticketCheck`, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json',},
-      body: JSON.stringify({"user": [{username: document.cookie.split('=')[1]}]})
-    })
-    .then(response => response.json(),
-    error => console.log(error)
-    )
-    .then(response => {
-      console.log('orig tickets')
-      console.log(this.state.tickets)
-      this.setState({tickets: response.dbRes});
-      console.log('updated tickets')
-      console.log(this.state.tickets);
-    })
+    if (document.cookie.length > 0) {
+      console.log('trying to fetch');
+      fetch(`http://${serverIp}:3001/ticketCheck`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json',},
+        body: JSON.stringify({"user": [{username: document.cookie.split('=')[1]}]})
+      })
+      .then(response => response.json(),
+      error => console.log(error)
+      )
+      .then(response => {
+        console.log('orig tickets')
+        console.log(this.state.tickets)
+        this.setState({tickets: response.dbRes});
+        console.log('updated tickets')
+        console.log(this.state.tickets);
+      })
+    }
   }
 
   componentDidMount() {
