@@ -7,17 +7,18 @@ class FileZone extends React.Component {
     super(...args);
     this.state = {
       tickets: [
-        { id: 0, subject: "something 1", body: "this email message 1"},
-        { id: 1, subject: "something 2", body: "this email message 2"},
+        { id: 0, asubject: "something 1", abody: "this email message 1"},
+        { id: 1, asubject: "something 2", abody: "this email message 2"},
       ],
-      someSubjectField : '',
-      someBodyField : '',
+      subjectField : '',
+      bodyField : '',
+      fromField: '',
     }
   }
 
-  getSavedTickets(username) {
+  //shouldn't be in submission form, loads initial tickets
+  getSavedTickets() {
     if (document.cookie.length > 0) {
-      console.log('trying to fetch');
       fetch(`http://${serverIp}:3001/ticketCheck`, {
         method: 'POST',
         mode: 'cors',
@@ -28,11 +29,7 @@ class FileZone extends React.Component {
       error => console.log(error)
       )
       .then(response => {
-        console.log('orig tickets')
-        console.log(this.state.tickets)
         this.setState({tickets: response.dbRes});
-        console.log('updated tickets')
-        console.log(this.state.tickets);
       })
     }
   }
@@ -41,12 +38,16 @@ class FileZone extends React.Component {
     this.getSavedTickets(document.cookie.split('=')[1]);
   }
 
+  setFrom(e) {
+    this.setState({fromField: e});
+  }
+
   setSubject(e) {
-    this.setState({someSubjectField: e});
+    this.setState({subjectField: e});
   }
 
   setBody(e) {
-    this.setState({someBodyField: e});
+    this.setState({bodyField: e});
   }
 
   onTicketSubmit = (e) => {
@@ -54,15 +55,15 @@ class FileZone extends React.Component {
     e.preventDefault();
     
     let ticketInfo = {
-      "ticket": [
-        {
-          "subject" : this.state.someSubjectField,
-          "body": this.state.someBodyField
-        }
-      ]
+    "ticket": [{
+        "id" : Date(),
+        "afrom" : this.state.fromField,
+        "asubject" : this.state.subjectField,
+        "abody": this.state.bodyField
+      }]
     }
 
-    fetch(`http://${serverIp}:3001/emailDrop`, {
+    fetch(`http://${serverIp}:3001/updateTickets`, {
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'application/json',},
@@ -73,6 +74,7 @@ class FileZone extends React.Component {
     )
     .then(response => {
       console.log(response);
+      this.getSavedTickets();
     })
   }
 
@@ -80,13 +82,21 @@ class FileZone extends React.Component {
     return (
       <div>
         <form onSubmit={this.onTicketSubmit}>
-          <label>Enter Subjet Here:
+          <label>Enter From Here: 
+            <input 
+              type="text" 
+              onChange={(e) => this.setFrom(e.target.value)}
+            />
+          </label>
+
+          <label>Enter Subjet Here: 
             <input 
               type="text" 
               onChange={(e) => this.setSubject(e.target.value)}
             />
           </label>
-          <label>Enter Body Here:
+
+          <label>Enter Body Here: 
             <input 
               type="text" 
               onChange={(e) => this.setBody(e.target.value)}
@@ -97,7 +107,7 @@ class FileZone extends React.Component {
 
         {this.state.tickets.map((tickets) => {
           return <li key={tickets.id}>
-            {tickets.asubject} {tickets.abody}
+            From: {tickets.afrom} Subject: {tickets.asubject} Body: {tickets.abody}
           </li>
         })}
       </div>)

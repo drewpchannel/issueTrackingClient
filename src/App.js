@@ -1,7 +1,7 @@
 import { useState, useEffect} from 'react'
 import logo from "./logo.svg";
 import "./App.css";
-import FileZone from './draganddrop.js';
+import FileZone from './submissionForm.js';
 
 const serverIp = '10.16.35.54';
 

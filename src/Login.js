@@ -45,7 +45,6 @@ class NameForm extends React.Component {
     }
   
     handleSubmit(event) {
-      //alert('A name was submitted: ' + this.state.valueUsername + ' pass: ' + this.state.valuePassword);
       fetch(`http://${serverIp}:3001/createuser`, {
         method: 'POST',
         mode: 'cors',
@@ -58,7 +57,6 @@ class NameForm extends React.Component {
       .then((response) => {
         console.log(response)
         if (response.dbRes === 1) {
-          //I'll need to check for a password and send back something else for incorrect pswd
           if(document.cookie.length === 0) {
             document.cookie = `userIsLoggedIn=${this.state.valueUsername};`
             this.setState({cookieNameData: document.cookie.split('=')[1]});
@@ -84,7 +82,6 @@ class NameForm extends React.Component {
       event.preventDefault()
     }
 
-    //I NEED THIS TO CHECK FOR COOKIES AND UPDATE
     checkForCookie() {
       let cookie = document.cookie;
       if(!document.cookie || document.cookie === '') {
