@@ -1,7 +1,6 @@
 import { useState, useEffect} from 'react'
 import logo from "./logo.svg";
 import "./App.css";
-import FileZone from './submissionForm.js';
 
 const serverIp = '10.16.35.54';
 
@@ -15,11 +14,10 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
-      <header className="App-header">
+    <div>
+      <header>
         <img src={logo} className="App-logo" alt="logo" />
         <p>{!data ? "Loading..." : data}</p>
-        <FileZone />
       </header>
     </div>
   );

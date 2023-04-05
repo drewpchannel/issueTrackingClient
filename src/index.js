@@ -4,12 +4,14 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import NameForm from './Login.js'
+import SubmissionForm from './submissionForm.js';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <NameForm />
     <App />
+    <SubmissionForm />
   </React.StrictMode>
 );
 

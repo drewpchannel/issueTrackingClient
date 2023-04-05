@@ -1,25 +1,23 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
+import { myIP } from './serverip'
 
-const serverIp = '10.16.35.54';
+//form shouldn't also be submitting tickets 
 
-class FileZone extends React.Component {
-  constructor(...args) {
-    super(...args);
-    this.state = {
-      tickets: [
-        { id: 0, asubject: "something 1", abody: "this email message 1"},
-        { id: 1, asubject: "something 2", abody: "this email message 2"},
-      ],
-      subjectField : '',
-      bodyField : '',
-      fromField: '',
-    }
-  }
+function SubmissionForm () {
+  const [tickets, setTickets] = useState(
+    [
+      { id: 0, afrom: "NoOne", asubject: "Example 1", abody: "this email message 1"},
+      { id: 1, afrom: "NoTwo", asubject: "Example 2", abody: "this email message 2"},
+    ]
+  );
+  const [subjectField, setSubject] = useState('');
+  const [bodyField, setBody] = useState('');
+  const [fromField, setFrom] = useState('');
 
   //shouldn't be in submission form, loads initial tickets
-  getSavedTickets() {
+  function getSavedTickets() {
     if (document.cookie.length > 0) {
-      fetch(`http://${serverIp}:3001/ticketCheck`, {
+      fetch(`http://${myIP}:3001/ticketCheck`, {
         method: 'POST',
         mode: 'cors',
         headers: { 'Content-Type': 'application/json',},
@@ -29,41 +27,41 @@ class FileZone extends React.Component {
       error => console.log(error)
       )
       .then(response => {
-        this.setState({tickets: response.dbRes});
+        setTickets(response.dbRes);
       })
     }
   }
 
-  componentDidMount() {
-    this.getSavedTickets(document.cookie.split('=')[1]);
+  useEffect (() => {
+    getSavedTickets(document.cookie.split('=')[1]);
+  }, []);
+
+  const handleFrom = e => {
+    setFrom(e.target.value);
   }
 
-  setFrom(e) {
-    this.setState({fromField: e});
+  const handleSubject = e => {
+    setSubject(e.target.value);
   }
 
-  setSubject(e) {
-    this.setState({subjectField: e});
+  const handleBody = e => {
+    setBody(e.target.value);
   }
 
-  setBody(e) {
-    this.setState({bodyField: e});
-  }
-
-  onTicketSubmit = (e) => {
+  const onTicketSubmit = (e) => {
     e.stopPropagation();
     e.preventDefault();
     
     let ticketInfo = {
     "ticket": [{
         "id" : Date(),
-        "afrom" : this.state.fromField,
-        "asubject" : this.state.subjectField,
-        "abody": this.state.bodyField
+        "afrom" : fromField,
+        "asubject" : subjectField,
+        "abody": bodyField
       }]
     }
 
-    fetch(`http://${serverIp}:3001/updateTickets`, {
+    fetch(`http://${myIP}:3001/updateTickets`, {
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'application/json',},
@@ -74,44 +72,43 @@ class FileZone extends React.Component {
     )
     .then(response => {
       console.log(response);
-      this.getSavedTickets();
+      getSavedTickets();
     })
   }
 
-  render() {
-    return (
-      <div>
-        <form onSubmit={this.onTicketSubmit}>
-          <label>Enter From Here: 
-            <input 
-              type="text" 
-              onChange={(e) => this.setFrom(e.target.value)}
-            />
-          </label>
+  return (
+    <div>
+      <form onSubmit={onTicketSubmit}>
+        <label>Enter From Here: 
+          <input 
+            type="text" 
+            onChange={handleFrom}
+          />
+        </label>
 
-          <label>Enter Subjet Here: 
-            <input 
-              type="text" 
-              onChange={(e) => this.setSubject(e.target.value)}
-            />
-          </label>
+        <label>Enter Subjet Here: 
+          <input 
+            type="text" 
+            onChange={handleSubject}
+          />
+        </label>
 
-          <label>Enter Body Here: 
-            <input 
-              type="text" 
-              onChange={(e) => this.setBody(e.target.value)}
-            />
-          </label>
-          <input type="submit" />
-        </form>
+        <label>Enter Body Here: 
+          <input 
+            type="text" 
+            onChange={handleBody}
+          />
+        </label>
+        <input type="submit" />
+      </form>
 
-        {this.state.tickets.map((tickets) => {
-          return <li key={tickets.id}>
-            From: {tickets.afrom} Subject: {tickets.asubject} Body: {tickets.abody}
-          </li>
-        })}
-      </div>)
-  }
+      {tickets.map((tickets) => {
+        return <li key={tickets.id}>
+          From: {tickets.afrom} Subject: {tickets.asubject} Body: {tickets.abody}
+        </li>
+      })}
+    </div>
+  )
 }
 
-export default FileZone;
+export default SubmissionForm;
