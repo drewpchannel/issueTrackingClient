@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { myIP } from './serverip'
+import getSavedTickets from './getTickets'
 
 //form shouldn't also be submitting tickets 
 
@@ -15,40 +16,24 @@ function SubmissionForm () {
   const [fromField, setFrom] = useState('');
 
   //shouldn't be in submission form, loads initial tickets
-  function getSavedTickets() {
+
+  useEffect (() => {
+    refreshTickets();
+  }, []);
+
+  const refreshTickets = () => {
     if (document.cookie.length > 0) {
-      fetch(`http://${myIP}:3001/ticketCheck`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json',},
-        body: JSON.stringify({"user": [{username: document.cookie.split('=')[1]}]})
-      })
-      .then(response => response.json(),
-      error => console.log(error)
-      )
-      .then(response => {
-        setTickets(response.dbRes);
-      })
+      getSavedTickets().then((response) => setTickets(response));
     }
   }
 
-  useEffect (() => {
-    getSavedTickets(document.cookie.split('=')[1]);
-  }, []);
+  const handleFrom = e => setFrom(e.target.value);
 
-  const handleFrom = e => {
-    setFrom(e.target.value);
-  }
+  const handleSubject = e => setSubject(e.target.value);
 
-  const handleSubject = e => {
-    setSubject(e.target.value);
-  }
+  const handleBody = e => setBody(e.target.value);
 
-  const handleBody = e => {
-    setBody(e.target.value);
-  }
-
-  const onTicketSubmit = (e) => {
+  const onTicketSubmit = e => {
     e.stopPropagation();
     e.preventDefault();
     
@@ -71,8 +56,7 @@ function SubmissionForm () {
     error => console.log(error)
     )
     .then(response => {
-      console.log(response);
-      getSavedTickets();
+      getSavedTickets().then((response) => setTickets(response));
     })
   }
 
