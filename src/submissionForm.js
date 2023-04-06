@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { myIP } from './serverip'
 import getSavedTickets from './getTickets'
 
-//form shouldn't also be submitting tickets 
-
 function SubmissionForm () {
   const [tickets, setTickets] = useState(
     [
@@ -15,9 +13,7 @@ function SubmissionForm () {
   const [bodyField, setBody] = useState('');
   const [fromField, setFrom] = useState('');
 
-  //shouldn't be in submission form, loads initial tickets
-
-  useEffect (() => {
+  useEffect(() => {
     refreshTickets();
   }, []);
 
@@ -56,7 +52,22 @@ function SubmissionForm () {
     error => console.log(error)
     )
     .then(response => {
-      getSavedTickets().then((response) => setTickets(response));
+      refreshTickets();
+    })
+  }
+
+  const deleteTicket = (tickets) => {
+    fetch(`http://${myIP}:3001/ticketDelete`, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json',},
+      body: JSON.stringify({username: document.cookie.split('=')[1], id: tickets.id})
+    })
+    .then(response => response.json(),
+    error => console.log(error)
+    )
+    .then(response => {
+      refreshTickets();
     })
   }
 
@@ -89,6 +100,7 @@ function SubmissionForm () {
       {tickets.map((tickets) => {
         return <li key={tickets.id}>
           From: {tickets.afrom} Subject: {tickets.asubject} Body: {tickets.abody}
+          <button onClick={() => deleteTicket(tickets)}>Del</button>
         </li>
       })}
     </div>
