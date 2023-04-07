@@ -1,0 +1,16 @@
+body {
+	background-color: grey;
+}
+
+.buttonBox {
+	display: flex;
+	flex-direction: row;
+}
+
+.subjecttext {
+	margin-left: 10px;
+}
+
+.bodytext {
+	margin-left: 30px;
+}

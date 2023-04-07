@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { myIP } from './serverip'
 import getSavedTickets from './getTickets'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import './submissionForm.css'
 
 function SubmissionForm () {
   const [tickets, setTickets] = useState(
@@ -19,7 +21,7 @@ function SubmissionForm () {
 
   const refreshTickets = () => {
     if (document.cookie.length > 0) {
-      getSavedTickets().then((response) => setTickets(response));
+      getSavedTickets().then((response) => setTickets(response.reverse()));
     }
   }
 
@@ -53,6 +55,12 @@ function SubmissionForm () {
     )
     .then(response => {
       refreshTickets();
+      setBody('');
+      setFrom('');
+      setSubject('');
+      e.target[0].value = '';
+      e.target[1].value = '';
+      e.target[2].value = '';
     })
   }
 
@@ -74,33 +82,40 @@ function SubmissionForm () {
   return (
     <div>
       <form onSubmit={onTicketSubmit}>
-        <label>Enter From Here: 
-          <input 
-            type="text" 
-            onChange={handleFrom}
-          />
-        </label>
 
-        <label>Enter Subjet Here: 
-          <input 
-            type="text" 
-            onChange={handleSubject}
-          />
-        </label>
+        <div className="form-outline">
+          <label className="form-label" htmlFor="textAreaFrom">From: </label>
+          <textarea className="form-control" id="textAreaFrom" rows="1" onChange={handleFrom}></textarea>
+        </div>
 
-        <label>Enter Body Here: 
-          <input 
-            type="text" 
-            onChange={handleBody}
-          />
-        </label>
-        <input type="submit" />
+        <div className="form-outline">
+          <label className="form-label" htmlFor="textAreaSubject">Subject: </label>
+          <textarea className="form-control" id="textAreaSubject" rows="1" onChange={handleSubject}></textarea>
+        </div>
+
+        <div className="form-outline">
+          <label className="form-label" htmlFor="textAreaBody">Body: </label>
+          <textarea className="form-control" id="textAreaBody" rows="4" onChange={handleBody}></textarea>
+        </div>
+        <input className="btn btn-primary" type="submit" />
       </form>
-
+      <p />
       {tickets.map((tickets) => {
-        return <li key={tickets.id}>
-          From: {tickets.afrom} Subject: {tickets.asubject} Body: {tickets.abody}
-          <button onClick={() => deleteTicket(tickets)}>Del</button>
+        return <li key={tickets.id} className="card text-white bg-dark mb-3">
+          <div className="card-header">From: {tickets.afrom}</div>
+          <div className="card-body">
+            <div className="buttonBox">
+              <button className="btn btn-outline-info">Upd</button>
+              <div className="card-title" className="subjecttext">Subject: {tickets.asubject}</div>
+            </div>
+            <div className="buttonBox">
+              <button className="btn btn-outline-info">Upd</button>
+              <div className="card-text" className="bodytext">{tickets.abody}</div>
+            </div>
+          </div>
+          <div>
+            <button className="btn btn-primary" onClick={() => deleteTicket(tickets)} variant="primary">Del</button>
+          </div>
         </li>
       })}
     </div>
