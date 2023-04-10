@@ -34,13 +34,36 @@ function SubmissionForm () {
   const onTicketSubmit = e => {
     e.stopPropagation();
     e.preventDefault();
+    let bodyValidated;
+    let fromValidated;
+    let subjectValidated;
+
+    //Left fields expanded to check for SQL injection checks
+    if (bodyField.length > 1099) {
+      alert('1100 character limit');
+      bodyValidated = bodyField.slice(0, 1099);
+    } else {
+      bodyValidated = bodyField;
+    }
+
+    if (subjectField.length > 79) {
+      subjectValidated = subjectField.slice(0, 79);
+    } else {
+      subjectValidated = subjectField;
+    }
     
+    if (fromField.length > 79) {
+      fromValidated = fromField.slice(0, 79);
+    } else {
+      fromValidated = fromField
+    }
+
     let ticketInfo = {
     "ticket": [{
         "id" : Date(),
-        "afrom" : fromField,
-        "asubject" : subjectField,
-        "abody": bodyField
+        "afrom" : fromValidated,
+        "asubject" : subjectValidated,
+        "abody": bodyValidated
       }]
     }
 
@@ -106,11 +129,11 @@ function SubmissionForm () {
           <div className="card-body">
             <div className="buttonBox">
               <button className="btn btn-outline-info">Upd</button>
-              <div className="card-title" className="subjecttext">Subject: {tickets.asubject}</div>
+              <div className="card-title subjecttext">Subject: {tickets.asubject}</div>
             </div>
             <div className="buttonBox">
               <button className="btn btn-outline-info">Upd</button>
-              <div className="card-text" className="bodytext">{tickets.abody}</div>
+              <div className="card-text bodytext">{tickets.abody}</div>
             </div>
           </div>
           <div>
