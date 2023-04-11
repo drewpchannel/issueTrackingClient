@@ -14,14 +14,28 @@ function SubmissionForm () {
   const [subjectField, setSubject] = useState('');
   const [bodyField, setBody] = useState('');
   const [fromField, setFrom] = useState('');
+  const [ticketFormToggle, setTicketFormToggle] = useState(false);
+  const [chgState, setChgState] = useState([]);
+  const [chgInput, setChangeInput] = useState('');
 
+  //may need to return something to stop refreshes from happening.  may only be necessary for event listeners
   useEffect(() => {
     refreshTickets();
   }, []);
 
-  const refreshTickets = () => {
+  const refreshTickets = (checkAgain) => {
     if (document.cookie.length > 0) {
-      getSavedTickets().then((response) => setTickets(response.reverse()));
+      getSavedTickets().then((response) => {
+        setTickets(response.reverse());
+      })
+      //double checking, functions run at the correct time but updated tickets not always returned intermittently 
+      .then(() => {
+        if (checkAgain) {
+          getSavedTickets().then((response) => {
+            setTickets(response.reverse());
+          })
+        }
+      });
     }
   }
 
@@ -30,6 +44,8 @@ function SubmissionForm () {
   const handleSubject = e => setSubject(e.target.value);
 
   const handleBody = e => setBody(e.target.value);
+
+  const handleChange = e => setChangeInput(e.target.value);
 
   const onTicketSubmit = e => {
     e.stopPropagation();
@@ -60,7 +76,7 @@ function SubmissionForm () {
 
     let ticketInfo = {
     "ticket": [{
-        "id" : Date(),
+        "id" : Date().slice(0,25),
         "afrom" : fromValidated,
         "asubject" : subjectValidated,
         "abody": bodyValidated
@@ -77,7 +93,7 @@ function SubmissionForm () {
     error => console.log(error)
     )
     .then(response => {
-      refreshTickets();
+      refreshTickets(true);
       setBody('');
       setFrom('');
       setSubject('');
@@ -102,42 +118,78 @@ function SubmissionForm () {
     })
   }
 
+  const showTicketForm = (e) => setTicketFormToggle(!ticketFormToggle);
+
+  const chgStateToggle = (i) => {
+    //checks if false or undfined, spreads it by ticket number, uses the index number from map, and sets it.
+    chgState[i]
+      ? setChgState({ ...chgState, [i]: !chgState[i] })
+      : setChgState({ ...chgState, [i]: true });
+  };
+
+  const onChgSumbit = (id) => {
+    if(chgInput !== '') {
+      fetch(`http://${myIP}:3001/ticketChange`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json',},
+        body: JSON.stringify({username: document.cookie.split('=')[1], id: id, changeText: chgInput})
+      })
+      .then(response => response.json(),
+      error => console.log(error)
+      )
+      .then(response => {
+        refreshTickets();
+      })
+    }
+  }
+
   return (
     <div>
-      <form onSubmit={onTicketSubmit}>
-
-        <div className="form-outline">
-          <label className="form-label" htmlFor="textAreaFrom">From: </label>
-          <textarea className="form-control" id="textAreaFrom" rows="1" onChange={handleFrom}></textarea>
+      <button onClick={showTicketForm}>New Ticket</button>
+      {ticketFormToggle &&
+        <div>
+          <form onSubmit={onTicketSubmit}>
+            <div className="form-outline">
+              <label className="form-label" htmlFor="textAreaFrom">From: </label>
+              <textarea className="form-control" id="textAreaFrom" rows="1" onChange={handleFrom}></textarea>
+            </div>
+            <div className="form-outline">
+              <label className="form-label" htmlFor="textAreaSubject">Subject: </label>
+              <textarea className="form-control" id="textAreaSubject" rows="1" onChange={handleSubject}></textarea>
+            </div>
+            <div className="form-outline">
+              <label className="form-label" htmlFor="textAreaBody">Body: </label>
+              <textarea className="form-control" id="textAreaBody" rows="4" onChange={handleBody}></textarea>
+            </div>
+            <input className="btn btn-primary" type="submit" />
+          </form>;
         </div>
-
-        <div className="form-outline">
-          <label className="form-label" htmlFor="textAreaSubject">Subject: </label>
-          <textarea className="form-control" id="textAreaSubject" rows="1" onChange={handleSubject}></textarea>
-        </div>
-
-        <div className="form-outline">
-          <label className="form-label" htmlFor="textAreaBody">Body: </label>
-          <textarea className="form-control" id="textAreaBody" rows="4" onChange={handleBody}></textarea>
-        </div>
-        <input className="btn btn-primary" type="submit" />
-      </form>
+      }
       <p />
-      {tickets.map((tickets) => {
-        return <li key={tickets.id} className="card text-white bg-dark mb-3">
-          <div className="card-header">From: {tickets.afrom}</div>
+      {tickets.map((ticket, index) => {
+        return <li key={ticket.id} className="card text-white bg-dark mb-3">
+          <div className="card-header">From: {ticket.afrom}</div>
           <div className="card-body">
             <div className="buttonBox">
-              <button className="btn btn-outline-info">Upd</button>
-              <div className="card-title subjecttext">Subject: {tickets.asubject}</div>
+              <div className="card-title subjecttext">Subject: {ticket.asubject}</div>
             </div>
             <div className="buttonBox">
-              <button className="btn btn-outline-info">Upd</button>
-              <div className="card-text bodytext">{tickets.abody}</div>
+              <div className="card-text bodytext">{ticket.abody}</div>
             </div>
           </div>
           <div>
-            <button className="btn btn-primary" onClick={() => deleteTicket(tickets)} variant="primary">Del</button>
+            <button className="btn btn-primary buttonSubCSS" onClick={() => deleteTicket(ticket)} variant="primary">Del</button>
+            <button className="btn btn-primary buttonSubCSS" onClick={() => chgStateToggle(index)} variant="primary">Chg</button>
+            {chgState[index] && 
+              <form onSubmit={() => onChgSumbit(ticket.id)}>
+                <div className="form-outline">
+                  <label className="form-label" htmlFor="textAreaFrom">Change: </label>
+                  <textarea className="form-control" id="textAreaFrom" rows="1" onChange={handleChange}></textarea>
+                </div>
+                <input className="btn btn-primary" type="submit" />
+              </form>
+            }
           </div>
         </li>
       })}
