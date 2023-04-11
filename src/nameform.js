@@ -1,4 +1,5 @@
 import React from "react";
+import './nameform.css'
 //might want to just use hooks for the above
 //change data name and move into the class to wait for user info
 const serverIp = '10.16.35.54';
@@ -61,6 +62,7 @@ class NameForm extends React.Component {
             document.cookie = `userIsLoggedIn=${this.state.valueUsername};`
             this.setState({cookieNameData: document.cookie.split('=')[1]});
             this.setState({isLoggedIn: true});
+            window.location.reload();
           } else {
             this.setState({cookieNameData: document.cookie.split('=')[1]});
             this.setState({isLoggedIn: true});
@@ -92,13 +94,21 @@ class NameForm extends React.Component {
       }
     }
 
+    handleLogout() {
+      document.cookie = `userIsLoggedIn=${document.cookie.split('=')[1]}; expires=Thu, 18 Dec 2013 12:00:00 UTC`
+      window.location.reload();
+    }
+
     render() {
       let loginStatus;
       let isPassInvalid;
 
       if (this.state.cookieNameData) {
         loginStatus = 
-        <p>Welcome {this.state.cookieNameData}</p>;
+        <div className="loggedInInfo">
+          <p>Welcome {this.state.cookieNameData}</p>
+          <button className="logoutButton" onClick={this.handleLogout}>Logout</button>
+        </div>
       } else {
         loginStatus =
         <form onSubmit={this.handleSubmit}>
