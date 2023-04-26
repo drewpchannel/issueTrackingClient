@@ -1,14 +1,13 @@
 import { useState, useEffect} from 'react'
 import logo from "./logo.svg";
 import "./App.css";
-
-const serverIp = '10.16.35.54';
+import { myIP } from './serverip';
 
 function App() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch(`http://${serverIp}:3001/api`)
+    fetch(`http://${myIP}:3001/api`)
       .then((res) => res.json())
       .then((data) => setData(data.message));
   }, []);

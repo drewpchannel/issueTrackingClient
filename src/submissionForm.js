@@ -17,27 +17,33 @@ function SubmissionForm () {
   const [ticketFormToggle, setTicketFormToggle] = useState(false);
   const [chgState, setChgState] = useState([]);
   const [chgInput, setChangeInput] = useState('');
+  const [userList, setUserList] = useState([document.cookie.split('=')[1]]);
+  const [userListTog, setUserListTog] = useState(false);
+  const [userListInput, setUserListInput] = useState('');
+
+  const refreshTickets = () => {
+    if (userList === []) {
+      if (document.cookie.length > 0) {
+        getSavedTickets().then((response) => {
+          setTickets(response.reverse());
+        })
+      }
+    } else {
+      let ticketsCurrent = [];
+      userList.forEach(elem => {
+        getSavedTickets(elem).then((response) => {
+          ticketsCurrent = ticketsCurrent.concat(response);
+          setTickets(ticketsCurrent);
+        })
+      });
+    }
+  }
 
   //may need to return something to stop refreshes from happening.  may only be necessary for event listeners
   useEffect(() => {
     refreshTickets();
+    // eslint-disable-next-line
   }, []);
-
-  const refreshTickets = (checkAgain) => {
-    if (document.cookie.length > 0) {
-      getSavedTickets().then((response) => {
-        setTickets(response.reverse());
-      })
-      //double checking, functions run at the correct time but updated tickets not always returned intermittently 
-      .then(() => {
-        if (checkAgain) {
-          getSavedTickets().then((response) => {
-            setTickets(response.reverse());
-          })
-        }
-      });
-    }
-  }
 
   const handleFrom = e => setFrom(e.target.value);
 
@@ -46,6 +52,8 @@ function SubmissionForm () {
   const handleBody = e => setBody(e.target.value);
 
   const handleChange = e => setChangeInput(e.target.value);
+
+  const handleUserListInput = e => setUserListInput(e.target.value);
 
   const onTicketSubmit = e => {
     e.stopPropagation();
@@ -93,7 +101,7 @@ function SubmissionForm () {
     error => console.log(error)
     )
     .then(response => {
-      refreshTickets(true);
+      refreshTickets();
       setBody('');
       setFrom('');
       setSubject('');
@@ -144,8 +152,34 @@ function SubmissionForm () {
     }
   }
 
+  //later on make this get a list from the server of everyone in userlogins.  pop the default and use that for auto name correction
+  const addToQue = () => {
+    setUserListTog(!userListTog);
+  }
+
+  const addToQueSubmit = e => {
+    e.stopPropagation();
+    e.preventDefault();
+    let x = userList;
+    x.push(userListInput);
+    setUserList(x);
+    refreshTickets();
+  }
+
   return (
     <div>
+      <button onClick={addToQue}>Add Users Ques</button>
+      {userListTog &&
+        <div>
+          <form onSubmit={addToQueSubmit}>
+            <div className="form-outline">
+              <label className="form-label" htmlFor="textAreaFrom">Username: </label>
+              <textarea className="form-control" id="textAreaFrom" rows="1" onChange={handleUserListInput}></textarea>
+            </div>
+            <input className="btn btn-primary" type="submit" />
+          </form>;
+        </div>
+      }
       <button onClick={showTicketForm}>New Ticket</button>
       {ticketFormToggle &&
         <div>

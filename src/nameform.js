@@ -1,8 +1,8 @@
 import React from "react";
 import './nameform.css'
+import { myIP } from './serverip';
 //might want to just use hooks for the above
 //change data name and move into the class to wait for user info
-const serverIp = '10.16.35.54';
 
 class NameForm extends React.Component {
     constructor(props) {
@@ -46,7 +46,7 @@ class NameForm extends React.Component {
     }
   
     handleSubmit(event) {
-      fetch(`http://${serverIp}:3001/createuser`, {
+      fetch(`http://${myIP}:3001/createuser`, {
         method: 'POST',
         mode: 'cors',
         headers: { 'Content-Type': 'application/json',},
