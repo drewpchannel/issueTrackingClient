@@ -20,8 +20,12 @@ function SubmissionForm () {
   const [userList, setUserList] = useState([document.cookie.split('=')[1]]);
   const [userListTog, setUserListTog] = useState(false);
   const [userListInput, setUserListInput] = useState('');
+  const [ticketFilter, setFilter] = useState('');
+  const [filterTog, setFilterTog] = useState(false);
 
   const refreshTickets = () => {
+    console.log(ticketFilter)
+    if (!document.cookie.split('=')[1]) { return; }
     if (userList === []) {
       if (document.cookie.length > 0) {
         getSavedTickets().then((response) => {
@@ -32,7 +36,17 @@ function SubmissionForm () {
       let ticketsCurrent = [];
       userList.forEach(elem => {
         getSavedTickets(elem).then((response) => {
-          ticketsCurrent = ticketsCurrent.concat(response);
+          let filteredArray = response;
+          if (ticketFilter) {
+            filteredArray = [];
+            response.forEach((elem) => {
+              console.log('comparing ' + elem.asubject + ' to ' + ticketFilter)
+              if (elem.asubject === ticketFilter) {
+                filteredArray.push(elem);
+              }
+            });
+          }
+          ticketsCurrent = ticketsCurrent.concat(filteredArray);
           setTickets(ticketsCurrent);
         })
       });
@@ -54,6 +68,8 @@ function SubmissionForm () {
   const handleChange = e => setChangeInput(e.target.value);
 
   const handleUserListInput = e => setUserListInput(e.target.value);
+
+  const handleFilter = e => setFilter(e.target.value);
 
   const onTicketSubmit = e => {
     e.stopPropagation();
@@ -153,9 +169,7 @@ function SubmissionForm () {
   }
 
   //later on make this get a list from the server of everyone in userlogins.  pop the default and use that for auto name correction
-  const addToQue = () => {
-    setUserListTog(!userListTog);
-  }
+  const addToQue = () => setUserListTog(!userListTog);
 
   const addToQueSubmit = e => {
     e.stopPropagation();
@@ -166,8 +180,28 @@ function SubmissionForm () {
     refreshTickets();
   }
 
+  const doFilterTog = () => setFilterTog(!filterTog);
+
+  const filterTickets = e => {
+    e.stopPropagation();
+    e.preventDefault();
+    refreshTickets();
+  }
+
   return (
     <div>
+      <button onClick={doFilterTog}>Filter Tickets</button>
+      {filterTog &&
+        <div>
+          <form onSubmit={filterTickets}>
+            <div className="form-outline">
+              <label className="form-label" htmlFor="textAreaFrom">Filter: </label>
+              <textarea className="form-control" id="textAreaFrom" rows="1" onChange={handleFilter}></textarea>
+            </div>
+            <input className="btn btn-primary" type="submit" />
+          </form>;
+        </div>
+      }      
       <button onClick={addToQue}>Add Users Ques</button>
       {userListTog &&
         <div>
