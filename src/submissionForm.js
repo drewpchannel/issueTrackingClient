@@ -24,7 +24,6 @@ function SubmissionForm () {
   const [filterTog, setFilterTog] = useState(false);
 
   const refreshTickets = () => {
-    console.log(ticketFilter)
     if (!document.cookie.split('=')[1]) { return; }
     if (userList === []) {
       if (document.cookie.length > 0) {
@@ -40,7 +39,6 @@ function SubmissionForm () {
           if (ticketFilter) {
             filteredArray = [];
             response.forEach((elem) => {
-              console.log('comparing ' + elem.asubject + ' to ' + ticketFilter)
               if (elem.asubject === ticketFilter) {
                 filteredArray.push(elem);
               }
